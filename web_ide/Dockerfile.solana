@@ -1,0 +1,21 @@
+# Debian base image to build rust and solana
+FROM debian:bullseye-slim as debian-base
+
+ENV RUSTUP_HOME=/usr/local/rustup \
+ CARGO_HOME=/usr/local/cargo \
+ CARGO=/usr/local/cargo/bin/cargo \
+ PATH=/usr/local/solana/bin:/usr/local/cargo/bin:$PATH \
+ RUST_VERSION=1.70.0 \
+ SOLANA_VERSION=1.16.8
+
+# Create the image containing node, solana and rust
+FROM debian-base as rust-base-img
+COPY /scripts/codigo-install-rust.sh  .
+RUN chmod -R +x codigo-install-rust.sh && ./codigo-install-rust.sh
+
+# Create the image containing node, solana and rust
+FROM debian-base as solana-base-img
+COPY --from=rust-base-img /usr/local/cargo /usr/local/cargo
+COPY --from=rust-base-img /usr/local/rustup /usr/local/rustup
+COPY /scripts/codigo-install-solana.sh /scripts/codigo-build-solana.sh /scripts/
+RUN chmod -R +x /scripts && ./scripts/codigo-install-solana.sh

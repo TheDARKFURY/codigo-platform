@@ -1,0 +1,5 @@
+plugins
+src-gen
+lib
+gen-webpack.config.js
+.theia

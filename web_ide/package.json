@@ -1,0 +1,19 @@
+{
+  "name": "root",
+  "private": true,
+  "scripts": {
+    "clean": "npx lerna run clean",
+    "build": "npx lerna run build",
+    "dev": "npx lerna run dev --parallel",
+    "start": "npx lerna run start",
+    "generate:extension": "yo theia-extension -b -s --skip-install"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "generator-theia-extension": "^0.1.33",
+    "lerna": "^6.6.1",
+    "yo": "^4.3.1"
+  }
+}

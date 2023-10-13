@@ -1,0 +1,82 @@
+# Build Eclipse Theia
+FROM node:18-bullseye as build-theia
+
+# install required tools to build the application
+RUN apt-get update && apt-get install -y libsecret-1-dev
+
+WORKDIR /usr/local/codigo
+COPY package.json yarn.lock ./
+COPY packages/codigo-cidl-quickstart/package.json ./packages/codigo-cidl-quickstart/
+COPY packages/codigo-cidl-realtime-doc/package.json ./packages/codigo-cidl-realtime-doc/
+COPY packages/theia/package.json ./packages/theia/
+RUN yarn install --frozen-lockfile
+
+# Copy repository files
+COPY . .
+
+# Remove unnecesarry files
+# Download plugins and build application production mode
+# Use yarn autoclean to remove unnecessary files from package dependencies
+RUN rm -rf .git && rm -rf scripts && rm -rf cloud && rm -rf .github && \
+    yarn --cwd "./packages/theia" download:plugins && \
+    yarn --cwd "./packages/codigo-cidl-realtime-doc" build && \
+    yarn --cwd "./packages/codigo-cidl-quickstart" build && \
+    yarn --cwd "./packages/theia" build && \
+    yarn install --production && \
+    yarn autoclean --init && \
+    echo **/*.ts >> .yarnclean && \
+    echo **/*.ts.map >> .yarnclean && \
+    echo **/*.spec.* >> .yarnclean && \
+    yarn autoclean --force && \
+    yarn cache clean
+
+# Build final image that includes: Theia, Node, Solana, Rust and Codigo generator
+FROM node:18-bullseye-slim as production-stage
+
+RUN adduser --system --group codigo
+
+ENV SHELL=/bin/bash \
+ THEIA_DEFAULT_PLUGINS=local-dir:/usr/local/codigo/packages/theia/plugins \
+ USE_LOCAL_GIT=true \
+ HOME=/home/codigo \
+ RUSTUP_HOME=/home/codigo/.rustup \
+ CARGO_HOME=/home/codigo/.cargo \
+ CARGO=/home/codigo/.cargo/bin/cargo \
+ PATH=/usr/local/codigo/generator:/home/codigo/.solana/bin:/home/codigo/.cargo/bin:$PATH \
+ RUST_VERSION=1.70.0 \
+ SOLANA_VERSION=1.16.8
+
+COPY --from=build-theia --chown=codigo:codigo /usr/local/codigo/.theia /home/codigo/.theia
+COPY --from=build-theia --chown=codigo:codigo /usr/local/codigo/workspace /home/codigo/workspace
+COPY --from=build-theia --chown=codigo:codigo /usr/local/codigo/.profile /home/codigo/.profile
+# This is a temporal fix, the Get Started extension requires it for some reason
+COPY --from=build-theia --chown=codigo:codigo /usr/local/codigo/package.json /home/codigo/package.json
+COPY --from=build-theia --chown=codigo:codigo /usr/local/codigo /usr/local/codigo
+COPY --from=solana-base-img --chown=codigo:codigo /usr/local/cargo /home/codigo/.cargo
+COPY --from=solana-base-img --chown=codigo:codigo /usr/local/rustup /home/codigo/.rustup
+COPY --from=solana-base-img --chown=codigo:codigo /usr/local/solana /home/codigo/.solana
+COPY --from=solana-base-img --chown=codigo:codigo /root/.cache/solana /home/codigo/.cache/solana
+
+# Install Theia depedency, and setup codigo generator
+RUN apt-get update && apt-get install -y --no-install-recommends git bash bzip2 ca-certificates gcc libc6-dev libsecret-1-0 && \
+    cargo install --git https://github.com/coral-xyz/anchor avm --locked --force && \
+    avm install latest && \
+    avm use latest && \
+    # Patika patch
+    chown -R codigo:codigo /home/codigo/.cargo && \
+    # This dependency should be remove in the future, this is required by codigo generator
+    npm install -g prettier && npm cache clean --force && \
+    chown -R 101:101 /home/codigo/.npm && \
+    apt-get remove -y --auto-remove wget && \
+    rm -rf /var/lib/apt/lists/*;
+    
+USER codigo
+WORKDIR /home/codigo
+
+# Configure solana
+RUN /home/codigo/.solana/bin/solana config set --url http://127.0.0.1:8899 && \
+    /home/codigo/.solana/bin/solana-keygen new -o /home/codigo/.config/solana/id.json --no-bip39-passphrase -s
+        
+# Run Theia
+EXPOSE 3000
+ENTRYPOINT [ "node", "/usr/local/codigo/packages/theia/src-gen/backend/main.js", "--hostname=0.0.0.0", "--log-level=warn" ]

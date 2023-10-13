@@ -1,0 +1,77 @@
+{
+  "name": "theia",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@theia/bulk-edit": "1.35.0",
+    "@theia/console": "1.35.0",
+    "@theia/core": "1.35.0",
+    "@theia/debug": "1.35.0",
+    "@theia/editor": "1.35.0",
+    "@theia/editor-preview": "1.35.0",
+    "@theia/file-search": "1.35.0",
+    "@theia/filesystem": "1.35.0",
+    "@theia/git": "1.35.0",
+    "@theia/keymaps": "1.35.0",
+    "@theia/markers": "1.35.0",
+    "@theia/messages": "1.35.0",
+    "@theia/monaco": "1.35.0",
+    "@theia/navigator": "1.35.0",
+    "@theia/outline-view": "1.35.0",
+    "@theia/output": "1.35.0",
+    "@theia/plugin-ext-vscode": "1.35.0",
+    "@theia/preferences": "1.35.0",
+    "@theia/preview": "1.35.0",
+    "@theia/search-in-workspace": "1.35.0",
+    "@theia/terminal": "1.35.0",
+    "@theia/timeline": "1.35.0",
+    "@theia/vsx-registry": "1.35.0",
+    "codigo-cidl-quickstart": "*"
+  },
+  "devDependencies": {
+    "@theia/cli": "1.35.0",
+    "concurrently": "8.0.1"
+  },
+  "scripts": {
+    "prepare": "yarn run clean && yarn build && yarn run download:plugins",
+    "clean": "theia clean",
+    "build": "theia build",
+    "dev": "concurrently \"yarn watch\" \"yarn start\"",
+    "watch": "theia build --watch --mode development",
+    "start": "theia start ../../workspace --plugins=local-dir:plugins --port=3000",
+    "download:plugins": "theia download:plugins --rate-limit=15"
+  },
+  "theia": {
+    "target": "browser",
+    "frontend": {
+      "config": {
+        "applicationName": "Codigo Studio",
+        "preferences": {
+          "files.enableTrash": false,
+          "redhat.telemetry.enabled": false,
+          "workbench.colorTheme": "Visual Studio Dark"
+        }
+      }
+    }
+  },
+  "theiaPluginsDir": "plugins",
+  "theiaPlugins": {
+    "vscode-builtin-extensions-pack": "https://open-vsx.org/api/eclipse-theia/builtin-extension-pack/1.64.2/file/eclipse-theia.builtin-extension-pack-1.64.2.vsix",
+    "redhat.vscode-yaml": "https://open-vsx.org/api/redhat/vscode-yaml/1.12.2/file/redhat.vscode-yaml-1.12.2.vsix",
+    "rust-lang.rust-analyzer": "https://open-vsx.org/api/rust-lang/rust-analyzer/linux-x64/0.4.1453/file/rust-lang.rust-analyzer-0.4.1453@linux-x64.vsix",
+    "vscode.typescript": "https://open-vsx.org/api/vscode/typescript/1.64.2/file/vscode.typescript-1.64.2.vsix",
+    "vscode.typescript-language-features": "https://open-vsx.org/api/vscode/typescript-language-features/1.64.2/file/vscode.typescript-language-features-1.64.2.vsix",
+    "bungcip.better-toml": "https://open-vsx.org/api/bungcip/better-toml/0.3.2/file/bungcip.better-toml-0.3.2.vsix",
+    "vscode.markdown-language-features": "https://open-vsx.org/api/vscode/markdown-language-features/1.64.2/file/vscode.markdown-language-features-1.64.2.vsix"
+  },
+  "theiaPluginsExcludeIds": [
+    "ms-vscode.js-debug-companion",
+    "vscode.extension-editing",
+    "vscode.git",
+    "vscode.git-ui",
+    "vscode.github",
+    "vscode.github-authentication",
+    "vscode.microsoft-authentication",
+    "vscode.ipynb"
+  ]
+}

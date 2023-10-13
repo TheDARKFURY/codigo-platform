@@ -1,0 +1,51 @@
+{
+  "name": "codigo-cidl-quickstart",
+  "private": true,
+  "keywords": [
+    "theia-extension"
+  ],
+  "version": "0.0.0",
+  "files": [
+    "lib",
+    "src"
+  ],
+  "dependencies": {
+    "@theia/core": "1.35.0",
+    "@theia/getting-started": "1.35.0",
+    "@uiw/react-markdown-preview": "4.1.13",
+    "autoprefixer": "10.4.14",
+    "clsx": "1.2.1",
+    "postcss": "8.4.21",
+    "remove": "0.1.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "0.5.9",
+    "@testing-library/react": "11.2.7",
+    "@types/jest": "26.0.20",
+    "autoprefixer": "10.4.14",
+    "concurrently": "8.0.1",
+    "jest": "26.6.3",
+    "postcss": "8.4.21",
+    "rimraf": "4.4.1",
+    "tailwindcss": "3.3.1",
+    "ts-jest": "26.5.6",
+    "ts-node": "10.9.1",
+    "typescript": "5.0.2"
+  },
+  "scripts": {
+    "prepare": "yarn run clean && yarn run build",
+    "clean": "rimraf lib",
+    "build": "yarn build:css && yarn build:web",
+    "build:web": "tsc",
+    "build:css": "npx tailwindcss -i ./src/browser/style/index.css -o ./src/browser/style/bundle.css",
+    "dev": "concurrently \"yarn dev:css\" \"yarn dev:web\"",
+    "dev:web": "tsc -w",
+    "dev:css": "npx tailwindcss -i ./src/browser/style/index.css -o ./src/browser/style/bundle.css --watch",
+    "test": "jest --config configs/jest.config.ts"
+  },
+  "theiaExtensions": [
+    {
+      "frontend": "lib/browser/codigo-cidl-quickstart-frontend-module"
+    }
+  ]
+}
