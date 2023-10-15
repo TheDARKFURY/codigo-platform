@@ -40,3 +40,6 @@ Código CLI offers a range of features that make it an indispensable tool for bl
 
 ## Demo Video
 Watch our demo video to see Código CLI in action:
+
+https://github.com/TheDARKFURY/codigo-platform/assets/62480336/5a1ef427-d657-426c-8d04-97f205688135
+
